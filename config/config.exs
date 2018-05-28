@@ -11,7 +11,11 @@ config :junky,
 
 # Configures the endpoint
 config :junky, JunkyWeb.Endpoint,
-  url: [host: "localhost"],
+  http: [port: {:system, "PORT"}],
+  url: [host: {:system, "HOST"}, port: {:system, "PORT"}],
+  server: true,
+  root: ".",
+  version: Application.spec(:myapp, :vsn),
   secret_key_base: "YatIEKg+V7OU70JF4IvpPpVdE07uVmv+VOgPsgfEs0ENWmJna5KdljoGxZrFt1lh",
   render_errors: [view: JunkyWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Junky.PubSub, adapter: Phoenix.PubSub.PG2]

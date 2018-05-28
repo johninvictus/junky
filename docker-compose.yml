@@ -1,0 +1,21 @@
+version: "3"
+services:
+  web:
+    image: "naps62/demo:0.1.0"
+    command: foreground
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: "ecto://postgres:postgres@db/junky_prod"
+      PORT: 4000
+      HOST: "localhost"
+      POOL_SIZE: 10
+
+  db:
+    image: postgres:9.6.2
+    environment:
+      POSTGRES_DB: "junky_prod"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"

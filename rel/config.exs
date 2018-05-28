@@ -36,6 +36,9 @@ environment :prod do
   set(include_erts: false)
   set(include_src: false)
   set(cookie: :"0%@^VnVK>SnTmzTUbnS<!);`PvYRl<PeVEcYp:nGitY_wtn/v,;sY_;Vq/t>O=]w")
+
+  # run migrations
+  set(post_start_hook: "rel/hooks/post_start")
 end
 
 # You may define one or more releases in this file.
@@ -49,6 +52,12 @@ release :junky do
   set(
     applications: [
       :runtime_tools
+    ]
+  )
+
+  set(
+    commands: [
+      migrate: "rel/commands/migrate.sh"
     ]
   )
 end
