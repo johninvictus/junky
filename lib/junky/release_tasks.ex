@@ -6,7 +6,10 @@ defmodule Junky.ReleaseTasks do
     :ecto
   ]
 
-  def myapp, do: Application.get_application(__MODULE__)
+  def myapp do
+    {:ok, app} = Application.get_application(__MODULE__)
+    app
+  end
 
   def repos, do: Application.get_env(myapp(), :ecto_repos, [])
 
@@ -28,8 +31,13 @@ defmodule Junky.ReleaseTasks do
     # Run migrations
     migrate()
 
-    # Run seed script
-    Enum.each(repos(), &run_seeds_for/1)
+    # Run the seed script if it exists
+    seed_script = Path.join([priv_dir(:junky), "repo", "seeds.exs"])
+
+    if File.exists?(seed_script) do
+      IO.puts("Running seed script..")
+      Code.eval_file(seed_script)
+    end
 
     # Signal shutdown
     IO.puts("Success!")
@@ -43,26 +51,9 @@ defmodule Junky.ReleaseTasks do
   defp run_migrations_for(repo) do
     app = Keyword.get(repo.config, :otp_app)
     IO.puts("Running migrations for #{app}")
-    Ecto.Migrator.run(repo, migrations_path(repo), :up, all: true)
+    Ecto.Migrator.run(repo, migrations_path(app), :up, all: true)
   end
 
-  def run_seeds_for(repo) do
-    # Run the seed script if it exists
-    seed_script = seeds_path(repo)
-
-    if File.exists?(seed_script) do
-      IO.puts("Running seed script..")
-      Code.eval_file(seed_script)
-    end
-  end
-
-  def migrations_path(repo), do: priv_path_for(repo, "migrations")
-
-  def seeds_path(repo), do: priv_path_for(repo, "seeds.exs")
-
-  def priv_path_for(repo, filename) do
-    app = Keyword.get(repo.config, :otp_app)
-    repo_underscore = repo |> Module.split() |> List.last() |> Macro.underscore()
-    Path.join([priv_dir(app), repo_underscore, filename])
-  end
+  defp migrations_path(app), do: Path.join([priv_dir(app), "repo", "migrations"])
+  defp seed_path(app), do: Path.join([priv_dir(app), "repo", "seeds.exs"])
 end

@@ -15,5 +15,5 @@ done
 set =e
 
 echo "Running migrations"
-bin/myapp migrate
+bin/junky migrate 
 echo "Migrations run successfully"

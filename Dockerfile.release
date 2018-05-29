@@ -1,10 +1,7 @@
-FROM bitwalker/alpine-erlang:19.3
+FROM bitwalker/alpine-elixir-phoenix
 
-RUN apk update && \
-    apk --no-cache --update add libgcc libstdc++ && \
-    rm -rf /var/cache/apk/*
 
-    RUN apk update && apk add bash
+RUN apk update && apk add bash
 
 EXPOSE 4000
 ENV PORT=4000 MIX_ENV=prod REPLACE_OS_VARS=true SHELL=/bin/sh

@@ -42,7 +42,8 @@ defmodule Junky.Mixfile do
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:torch, "~> 2.0.0-rc.1"},
-      {:mix_docker, "~> 0.5.0"}
+      {:mix_docker, "~> 0.5.0"},
+      {:tzdata, "== 0.1.8", override: true}
     ]
   end
 

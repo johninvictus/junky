@@ -1,7 +1,7 @@
 version: "3"
 services:
   web:
-    image: "naps62/demo:0.1.0"
+    image: "johninvictus/junky:0.0.1.2-83d8f1bc60"
     command: foreground
     depends_on:
       - db

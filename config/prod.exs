@@ -15,11 +15,22 @@ use Mix.Config
 # which you typically run after static files are built.
 config :junky, JunkyWeb.Endpoint,
   load_from_system_env: true,
-  url: [host: "example.com", port: 80],
-  cache_static_manifest: "priv/static/cache_manifest.json"
+  url: [host: "example.com", port: 80]
 
 # Do not print debug messages in production
 config :logger, level: :info
+
+config :junky, JunkyWeb.Endpoint,
+  secret_key_base: "4fI4NXrpY1hOhVvb26Nl7E5t3x3RvZtF1+uBlWBfxloxUABjoQgeuCXt9mEwdyoc"
+
+# Configure your database
+config :junky, Junky.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  url: {:system, "DATABASE_URL"},
+  username: "postgres",
+  password: "postgres",
+  database: "junky_prod",
+  pool_size: 15
 
 # ## SSL Support
 #

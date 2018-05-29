@@ -38,6 +38,7 @@ environment :prod do
   set(cookie: :"0%@^VnVK>SnTmzTUbnS<!);`PvYRl<PeVEcYp:nGitY_wtn/v,;sY_;Vq/t>O=]w")
 
   # run migrations
+
   set(post_start_hook: "rel/hooks/post_start")
 end
 
