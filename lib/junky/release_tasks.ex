@@ -1,59 +1,73 @@
 defmodule Junky.ReleaseTasks do
-  @start_apps [
-    :crypto,
-    :ssl,
-    :postgrex,
-    :ecto
-  ]
+  alias Ecto.Migrator
 
-  def myapp do
-    {:ok, app} = Application.get_application(__MODULE__)
-    app
+  @otp_app :junky
+  @start_apps [:logger, :ssl, :postgrex, :ecto]
+
+  def migrate do
+    init(@otp_app, @start_apps)
+
+    run_migrations_for(@otp_app)
+
+    stop()
   end
 
-  def repos, do: Application.get_env(myapp(), :ecto_repos, [])
-
   def seed do
-    me = myapp()
+    init(@otp_app, @start_apps)
 
-    IO.puts("Loading #{me}..")
-    # Load the code for myapp, but don't start it
-    :ok = Application.load(me)
+    "#{seed_path(@otp_app)}/*.exs"
+    |> Path.wildcard()
+    |> Enum.sort()
+    |> Enum.each(&run_seed_script/1)
+
+    stop()
+  end
+
+  defp init(app, start_apps) do
+    IO.puts("Loading app..")
+    :ok = Application.load(app)
 
     IO.puts("Starting dependencies..")
-    # Start apps necessary for executing migrations
-    Enum.each(@start_apps, &Application.ensure_all_started/1)
+    Enum.each(start_apps, &Application.ensure_all_started/1)
 
-    # Start the Repo(s) for myapp
     IO.puts("Starting repos..")
-    Enum.each(repos(), & &1.start_link(pool_size: 1))
 
-    # Run migrations
-    migrate()
+    app
+    |> Application.get_env(:ecto_repos, [])
+    |> Enum.each(& &1.start_link(pool_size: 1))
+  end
 
-    # Run the seed script if it exists
-    seed_script = Path.join([priv_dir(:junky), "repo", "seeds.exs"])
-
-    if File.exists?(seed_script) do
-      IO.puts("Running seed script..")
-      Code.eval_file(seed_script)
-    end
-
-    # Signal shutdown
+  defp stop do
     IO.puts("Success!")
     :init.stop()
   end
 
-  def migrate, do: Enum.each(repos(), &run_migrations_for/1)
-
-  def priv_dir(app), do: "#{:code.priv_dir(app)}"
-
-  defp run_migrations_for(repo) do
-    app = Keyword.get(repo.config, :otp_app)
+  defp run_migrations_for(app) do
     IO.puts("Running migrations for #{app}")
-    Ecto.Migrator.run(repo, migrations_path(app), :up, all: true)
+
+    app
+    |> Application.get_env(:ecto_repos, [])
+    |> Enum.each(&Migrator.run(&1, migrations_path(app), :up, all: true))
   end
 
-  defp migrations_path(app), do: Path.join([priv_dir(app), "repo", "migrations"])
-  defp seed_path(app), do: Path.join([priv_dir(app), "repo", "seeds.exs"])
+  defp run_seed_script(seed_script) do
+    IO.puts("Running seed script #{seed_script}..")
+    Code.eval_file(seed_script)
+  end
+
+  defp migrations_path(app),
+    do: priv_dir(app, ["repo", "migrations"])
+
+  defp seed_path(app),
+    do: priv_dir(app, ["repo", "seeds"])
+
+  defp priv_dir(app, path) when is_list(path) do
+    case :code.priv_dir(app) do
+      priv_path when is_list(priv_path) or is_binary(priv_path) ->
+        Path.join([priv_path] ++ path)
+
+      {:error, :bad_name} ->
+        raise ArgumentError, "unknown application: #{inspect(app)}"
+    end
+  end
 end

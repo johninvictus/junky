@@ -53,11 +53,9 @@ release :junky do
   set(
     applications: [
       :runtime_tools
-    ]
-  )
-
-  set(
+    ],
     commands: [
+      seed: "rel/commands/seed.sh",
       migrate: "rel/commands/migrate.sh"
     ]
   )
